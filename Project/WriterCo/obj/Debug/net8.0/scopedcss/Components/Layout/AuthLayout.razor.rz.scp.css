@@ -1,0 +1,14 @@
+.auth-page[b-4r9y4oqx3c] {
+    min-height: 100vh;
+    background-color: #000;
+    color: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+    padding: 20px 28px;
+    box-sizing: border-box;
+}
+
+.auth-page h1[b-4r9y4oqx3c] {
+    margin: 0;
+    font-size: 25px;
+    font-weight: 700;
+}

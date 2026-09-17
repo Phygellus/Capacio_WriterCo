@@ -1,0 +1,30 @@
+﻿@page "/"
+@using WriterCo.Components.Layout
+@layout MainLayout
+@inject NavigationManager Navigation
+
+<div class="home">
+    <h2>Welcome to Writer Co.</h2>
+
+    <p>Write Your Thoughts.</p>
+
+    <button @onclick="GoToLogin">
+        Sign In
+    </button>
+
+    <button @onclick="GoToRegister">
+        Sign Up
+    </button>
+</div>
+
+@code {
+    void GoToLogin()
+    {
+        Navigation.NavigateTo("/login");
+    }
+
+    void GoToRegister()
+    {
+        Navigation.NavigateTo("/register");
+    }
+}

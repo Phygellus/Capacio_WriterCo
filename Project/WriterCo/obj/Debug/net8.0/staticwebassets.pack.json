@@ -1,0 +1,41 @@
+{
+  "Files": [
+    {
+      "Id": "c:\\Users\\L23Y16W13\\Documents\\Projects\\Project\\WriterCo\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\WriterCo.bundle.scp.css",
+      "PackagePath": "staticwebassets\\WriterCo.bundle.scp.css"
+    },
+    {
+      "Id": "c:\\Users\\L23Y16W13\\Documents\\Projects\\Project\\WriterCo\\wwwroot\\app.css",
+      "PackagePath": "staticwebassets\\app.css"
+    },
+    {
+      "Id": "c:\\Users\\L23Y16W13\\Documents\\Projects\\Project\\WriterCo\\wwwroot\\bootstrap\\bootstrap.min.css",
+      "PackagePath": "staticwebassets\\bootstrap\\bootstrap.min.css"
+    },
+    {
+      "Id": "c:\\Users\\L23Y16W13\\Documents\\Projects\\Project\\WriterCo\\wwwroot\\bootstrap\\bootstrap.min.css.map",
+      "PackagePath": "staticwebassets\\bootstrap\\bootstrap.min.css.map"
+    },
+    {
+      "Id": "c:\\Users\\L23Y16W13\\Documents\\Projects\\Project\\WriterCo\\wwwroot\\favicon.png",
+      "PackagePath": "staticwebassets\\favicon.png"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.WriterCo.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.WriterCo.props",
+      "PackagePath": "build\\WriterCo.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.WriterCo.props",
+      "PackagePath": "buildMultiTargeting\\WriterCo.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.WriterCo.props",
+      "PackagePath": "buildTransitive\\WriterCo.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

@@ -1,0 +1,29 @@
+@inherits LayoutComponentBase
+
+<div class="main-layout">
+
+    <header class="navbar">
+        <div class="logo">
+            Writer Co.
+        </div>
+
+        <nav>
+            <NavLink href="/" Match="NavLinkMatch.All">
+                Home
+            </NavLink>
+
+            <NavLink href="/login">
+                Log In
+            </NavLink>
+
+            <NavLink href="/register">
+                Sign Up
+            </NavLink>
+        </nav>
+    </header>
+
+    <main class="content">
+        @Body
+    </main>
+
+</div>
