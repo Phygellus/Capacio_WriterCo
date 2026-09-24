@@ -50,8 +50,6 @@ c:\Users\L23Y16W13\Documents\Projects\Project\WriterCo\obj\Debug\net8.0\staticwe
 c:\Users\L23Y16W13\Documents\Projects\Project\WriterCo\obj\Debug\net8.0\staticwebassets\msbuild.buildTransitive.WriterCo.props
 c:\Users\L23Y16W13\Documents\Projects\Project\WriterCo\obj\Debug\net8.0\staticwebassets.pack.json
 c:\Users\L23Y16W13\Documents\Projects\Project\WriterCo\obj\Debug\net8.0\scopedcss\Components\Layout\AuthLayout.razor.rz.scp.css
-c:\Users\L23Y16W13\Documents\Projects\Project\WriterCo\obj\Debug\net8.0\scopedcss\Components\Layout\MainLayout.razor.rz.scp.css
-c:\Users\L23Y16W13\Documents\Projects\Project\WriterCo\obj\Debug\net8.0\scopedcss\Components\Layout\NavMenu.razor.rz.scp.css
 c:\Users\L23Y16W13\Documents\Projects\Project\WriterCo\obj\Debug\net8.0\scopedcss\Components\Pages\Home.razor.rz.scp.css
 c:\Users\L23Y16W13\Documents\Projects\Project\WriterCo\obj\Debug\net8.0\scopedcss\bundle\WriterCo.styles.css
 c:\Users\L23Y16W13\Documents\Projects\Project\WriterCo\obj\Debug\net8.0\scopedcss\projectbundle\WriterCo.bundle.scp.css
@@ -60,3 +58,5 @@ c:\Users\L23Y16W13\Documents\Projects\Project\WriterCo\obj\Debug\net8.0\refint\W
 c:\Users\L23Y16W13\Documents\Projects\Project\WriterCo\obj\Debug\net8.0\WriterCo.pdb
 c:\Users\L23Y16W13\Documents\Projects\Project\WriterCo\obj\Debug\net8.0\WriterCo.genruntimeconfig.cache
 c:\Users\L23Y16W13\Documents\Projects\Project\WriterCo\obj\Debug\net8.0\ref\WriterCo.dll
+c:\Users\L23Y16W13\Documents\Projects\Project\WriterCo\obj\Debug\net8.0\WriterCo.sourcelink.json
+c:\Users\L23Y16W13\Documents\Projects\Project\WriterCo\obj\Debug\net8.0\scopedcss\Components\Layout\MainNewLayout.razor.rz.scp.css

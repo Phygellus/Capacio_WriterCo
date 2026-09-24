@@ -54,13 +54,9 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xMYXlvdXRcQXV0aExheW91dC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = b-4r9y4oqx3c
 
-[c:/Users/L23Y16W13/Documents/Projects/Project/WriterCo/Components/Layout/MainLayout.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xMYXlvdXRcTWFpbkxheW91dC5yYXpvcg==
-build_metadata.AdditionalFiles.CssScope = b-a54wq3edjl
-
-[c:/Users/L23Y16W13/Documents/Projects/Project/WriterCo/Components/Layout/NavMenu.razor]
-build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xMYXlvdXRcTmF2TWVudS5yYXpvcg==
-build_metadata.AdditionalFiles.CssScope = b-2v6yr7uova
+[c:/Users/L23Y16W13/Documents/Projects/Project/WriterCo/Components/Layout/MainNewLayout.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xMYXlvdXRcTWFpbk5ld0xheW91dC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = b-f25ms1vc7x
 
 [c:/Users/L23Y16W13/Documents/Projects/Project/WriterCo/Components/Pages/Home.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xQYWdlc1xIb21lLnJhem9y

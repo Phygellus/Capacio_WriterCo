@@ -1,0 +1,17 @@
+@inherits LayoutComponentBase
+@* Components/Layout/MainNewLayout.razor *@
+
+<div class="main-layout">
+    <header class="navbar">
+        <div class="logo">WriterCo</div>
+        <nav>
+            <NavLink href="/" Match="NavLinkMatch.All">Home</NavLink>
+            <NavLink href="/Login">Login</NavLink>
+            <NavLink href="/Register">Register</NavLink>
+        </nav>
+    </header>
+
+    <main class="content">
+        @Body
+    </main>
+</div>
