@@ -1,17 +1,33 @@
 @inherits LayoutComponentBase
-@* Components/Layout/MainNewLayout.razor *@
+@inject NavigationManager Navigation
 
 <div class="main-layout">
     <header class="navbar">
-        <div class="logo">WriterCo</div>
+        <a href="/" class="logo">Writer Co.</a>
         <nav>
-            <NavLink href="/" Match="NavLinkMatch.All">Home</NavLink>
-            <NavLink href="/Login">Login</NavLink>
-            <NavLink href="/Register">Register</NavLink>
+            <button @onclick="GoToLogin" class="nav-btn">
+                Sign In
+            </button>
+
+            <button @onclick="GoToRegister" class="nav-btn">
+                Sign Up
+            </button>        
         </nav>
     </header>
-
+    
     <main class="content">
         @Body
     </main>
 </div>
+
+@code {
+    private void GoToLogin()
+    {
+        Navigation.NavigateTo("/login");
+    }
+
+    private void GoToRegister()
+    {
+        Navigation.NavigateTo("/register");
+    }
+}
