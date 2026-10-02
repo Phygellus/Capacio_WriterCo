@@ -1,8 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "C9hH5e+KKpU=",
+  "dgSpecHash": "ZybIHEnA2ik=",
   "success": true,
-  "projectFilePath": "C:\\Users\\caimo\\OneDrive\\Documents\\WriterCo\\Capacio_WriterCo\\Project\\WriterCo\\WriterCo.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "/home/jannyjaze/Project_Collections/Capacio_WriterCo/Project/WriterCo/WriterCo.csproj",
+  "expectedPackageFiles": [
+    "/home/jannyjaze/.nuget/packages/microsoft.netcore.app.ref/8.0.30/microsoft.netcore.app.ref.8.0.30.nupkg.sha512",
+    "/home/jannyjaze/.nuget/packages/microsoft.aspnetcore.app.ref/8.0.30/microsoft.aspnetcore.app.ref.8.0.30.nupkg.sha512",
+    "/home/jannyjaze/.nuget/packages/microsoft.netcore.app.host.linux-x64/8.0.30/microsoft.netcore.app.host.linux-x64.8.0.30.nupkg.sha512"
+  ],
   "logs": []
 }
