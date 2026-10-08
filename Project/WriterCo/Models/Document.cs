@@ -23,6 +23,11 @@ public class Document
         headings.Append(heading);
     }
 
+    public bool getIsPublished()
+    {
+        return isPublished;
+    }
+
     public void Published()
     {
         this.isPublished = true;
