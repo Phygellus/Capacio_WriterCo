@@ -5,6 +5,17 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+var url = builder.Configuration["Supabase:Url"]!;
+var key = builder.Configuration["Supabase:Key"]!;
+
+// 3. Register the Supabase Client BEFORE builder.Build()
+builder.Services.AddSingleton<Supabase.Client>(sp => 
+{
+    return new Supabase.Client(url, key, new Supabase.SupabaseOptions 
+    { 
+        AutoConnectRealtime = false 
+    });
+});
 
 var app = builder.Build();
 
@@ -13,6 +24,7 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
 }
 
@@ -24,17 +36,9 @@ app.UseAntiforgery();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-var url = builder.Configuration["Supabase:Url"]!;
-
-var key = builder.Configuration["Supabase:Key"]!;
-
-var supabase = new Supabase.Client(url, key,
-
-    new Supabase.SupabaseOptions { AutoConnectRealtime = false });
-
-await supabase.InitializeAsync();
-
-builder.Services.AddSingleton(supabase);
-
-await builder.Build().RunAsync();
+using (var scope = app.Services.CreateScope())
+{
+    var supabase = scope.ServiceProvider.GetRequiredService<Supabase.Client>();
+    await supabase.InitializeAsync();
+}
 app.Run();
