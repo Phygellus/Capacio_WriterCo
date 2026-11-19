@@ -3,7 +3,7 @@ using Supabase.Postgrest.Models;
 using System.Text.Json;
 
 [Table("documents")]
-public class Document : BaseModel
+public class DocumentModel : BaseModel // Changed name here
 {
     [PrimaryKey("id", false)]
     public long Id { get; set; }
@@ -23,11 +23,8 @@ public class Document : BaseModel
     [Column("created_at")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    // This IS a database column
     [Column("content_json")]
     public string ContentJson { get; set; } = "{\"pages\":[], \"headings\":[]}";
-
-    // NOT a database column (no [Column] attribute, no [Ignore] attribute)
     public List<Page> Pages 
     {
         get 

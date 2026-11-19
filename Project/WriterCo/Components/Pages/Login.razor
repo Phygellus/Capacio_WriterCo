@@ -1,27 +1,64 @@
 @page "/login"
 @using WriterCo.Components.Layout
 @layout AuthLayout
-<div class="auth-form">
-    <input type="email" class="auth-input" placeholder="Enter Email" />
-    <input type="password" class="auth-input" placeholder="Enter Password" />
+@inject NavigationManager Navigation
+@inject Supabase.Client Db
 
-    <button class="auth-btn" @onclick="GoToDashboard">Log In</button>
+<div class="auth-form">
+    <input type="email" class="auth-input" placeholder="Enter Email" @bind="email" />
+    <input type="password" class="auth-input" placeholder="Enter Password" @bind="password" />
+
+    <button class="auth-btn" @onclick="LogIn" disabled="@isLoading">
+        @(isLoading ? "Logging in..." : "Log In")
+    </button>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <p style="color: #ff4444; font-size: 14px; margin-top: 10px;">@errorMessage</p>
+    }
 
     <p class="auth-footer">
-        Don't have an account? <span @onclick="Register" class="nav-link">Sign Up</span>
+        Don't have an account? <span @onclick="GoToRegister" class="nav-link">Sign Up</span>
     </p>
 </div>
 
 @code {
-    [Inject]
-    private NavigationManager Navigation { get; set; } = default!;
+    private string email = "";
+    private string password = "";
+    private bool isLoading = false;
+    private string errorMessage = "";
 
-    private void Register()
+    private void GoToRegister()
     {
         Navigation.NavigateTo("/register");
     }
-    private void GoToDashboard()
+
+    private async Task LogIn()
     {
-        Navigation.NavigateTo("/dashboard");
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password)) return;
+
+        isLoading = true;
+        errorMessage = "";
+
+        try
+        {
+            // Slide 50: Protect against double clicks / network errors
+            var session = await Db.Auth.SignIn(email, password);
+
+            if (session != null)
+            {
+                Navigation.NavigateTo("/dashboard");
+            }
+        }
+        catch (Exception ex)
+        {
+            // Supabase throws an exception if login fails (e.g., wrong password)
+            errorMessage = "Invalid email or password. Please try again.";
+            Console.WriteLine(ex.Message);
+        }
+        finally
+        {
+            isLoading = false;
+        }
     }
 }

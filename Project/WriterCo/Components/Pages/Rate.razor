@@ -1,6 +1,7 @@
 @page "/rate"
 @using WriterCo.Components.Layout
 @layout MainNewLayout
+@inject Supabase.Client Db
 
 <div class="rating-container">
     <h2>Rate Our Website!</h2>
@@ -22,14 +23,15 @@
     </div>
 
     <div class="action-section">
-        <button class="post-btn" @onclick="SubmitReview">Post</button>
+        <!-- Slide 50: Disable button while posting -->
+        <button class="post-btn" @onclick="SubmitReview" disabled="@isPosting">
+            @(isPosting ? "Posting..." : "Post")
+        </button>
     </div>
 
     @if (showSuccessMessage)
     {
-        <div class="success-message">
-            Thank you! Your review has been posted.
-        </div>
+        <div class="success-message">Thank you! Your review has been posted.</div>
     }
 
     @if (reviews.Any())
@@ -53,17 +55,28 @@
 </div>
 
 @code {
-    public class Review
-    {
-        public int Rating { get; set; }
-        public string Comment { get; set; } = string.Empty;
-    }
-
     private int currentRating = 0;
     private string commentText = "";
     private bool showSuccessMessage = false;
+    private bool isPosting = false;
 
-    private List<Review> reviews = new List<Review>();
+    private List<Review> reviews = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadReviews();
+    }
+
+    private async Task LoadReviews()
+    {
+        // Slide 49: Fetch from DB where DeletedAt is null
+        var response = await Db.From<Review>()
+            .Where(r => r.DeletedAt == null)
+            .Order(r => r.Id, Supabase.Postgrest.Constants.Ordering.Descending)
+            .Get();
+            
+        reviews = response.Models;
+    }
 
     private void SetRating(int rating)
     {
@@ -71,24 +84,33 @@
         showSuccessMessage = false; 
     }
 
-    private void SubmitReview()
+    private async Task SubmitReview()
     {
-        if (currentRating == 0)
+        if (currentRating == 0 || isPosting) return;
+        isPosting = true;
+
+        try
         {
-            return;
+            var newReview = new Review
+            {
+                Rating = currentRating,
+                Comment = commentText,
+                UserId = 1 // Hardcoded until you add Auth
+            };
+            
+            // Slide 50: Send POST request
+            await Db.From<Review>().Insert(newReview);
+
+            showSuccessMessage = true;
+            currentRating = 0;
+            commentText = "";
+            
+            // Reload the list to show the new review
+            await LoadReviews();
         }
-
-        var newReview = new Review
+        finally
         {
-            Rating = currentRating,
-            Comment = commentText
-        };
-        
-        reviews.Add(newReview);
-
-        showSuccessMessage = true;
-        
-        currentRating = 0;
-        commentText = "";
+            isPosting = false;
+        }
     }
 }

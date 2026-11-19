@@ -2,6 +2,7 @@
 @using WriterCo.Components.Layout
 @layout SignedLayout
 @inject NavigationManager Navigation
+@inject Supabase.Client Db
 
 <div class="dashboard-container">
     <div class="document-grid">
@@ -13,38 +14,63 @@
             <span class="doc-title">New</span>
         </div>
 
-        @foreach (var doc in userDocuments)
+        @if (isLoading)
         {
-            <div class="doc-item" @onclick="() => OpenDocument(doc.Id)">
-                <div class="doc-thumbnail">
+            <p style="color: #888;">Loading documents...</p>
+        }
+        else
+        {
+            @foreach (var doc in userDocuments)
+            {
+                <div class="doc-item" @onclick="() => OpenDocument(doc.Id)">
+                    <div class="doc-thumbnail"></div>
+                    <span class="doc-title">@doc.Title</span>
                 </div>
-                <span class="doc-title">@doc.Title</span>
-            </div>
+            }
         }
     </div>
 </div>
 
 @code {
-    public class DocumentItem
+    private List<DocumentModel> userDocuments = new();
+    private bool isLoading = true;
+    private bool isCreating = false; 
+
+    protected override async Task OnInitializedAsync()
     {
-        public string Id { get; set; } = Guid.NewGuid().ToString();
-        public string Title { get; set; } = "Untitled";
+        await LoadDocuments();
     }
 
-    private List<DocumentItem> userDocuments = new List<DocumentItem>();
-
-    protected override void OnInitialized()
+    private async Task LoadDocuments()
     {
-        userDocuments.Add(new DocumentItem { Title = "Untitled" });
+        // Change to DocumentModel
+        var response = await Db.From<DocumentModel>()
+            .Where(d => d.DeletedAt == null)
+            .Order(d => d.Id, Supabase.Postgrest.Constants.Ordering.Descending)
+            .Get();
+            
+        userDocuments = response.Models;
     }
 
-    private void CreateNewDocument()
+    private async Task CreateNewDocument()
     {
-        Navigation.NavigateTo("/document");
+        var newDoc = new DocumentModel // Change here
+        {
+            Title = "Untitled",
+            OwnerId = 1 
+        };
+
+        var response = await Db.From<DocumentModel>().Insert(newDoc); // Change here
+        var createdDoc = response.Models.FirstOrDefault();
+        
+        if (createdDoc != null)
+        {
+            Navigation.NavigateTo($"/document?id={createdDoc.Id}");
+        }
     }
 
-    private void OpenDocument(string id)
+    private void OpenDocument(long id)
     {
-        Navigation.NavigateTo($"/document"); 
+        Navigation.NavigateTo($"/document?id={id}"); 
     }
 }

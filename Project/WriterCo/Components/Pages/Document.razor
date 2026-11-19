@@ -1,86 +1,131 @@
 @page "/document"
 @using WriterCo.Components.Layout
 @layout SignedLayout
+@inject NavigationManager Navigation
+@inject Supabase.Client Db
 
 <div class="editor-layout">
-    
     <div class="sidebar">
         <div class="menu-container">
-            <button class="icon-btn hamburger" @onclick="ToggleMenu">
-                &#9776;
-            </button>
+            <button class="icon-btn hamburger" @onclick="ToggleMenu">&#9776;</button>
             
             @if (isMenuOpen)
             {
                 <div class="dropdown-menu">
-                    <button @onclick="NewFile">New</button>
-                    <button @onclick="OpenFile">Open</button>
-                    <button @onclick="SaveFile">Save</button>
+                    <button @onclick='() => Navigation.NavigateTo("/dashboard")'>Back to Dashboard</button>
+                    <button @onclick="async () => await SaveFile()" disabled="@isSaving">
+                        @(isSaving ? "Saving..." : "Save")
+                    </button>
+                    <button @onclick="async () => await SoftDeleteFile()">Delete</button>
                 </div>
             }
         </div>
 
         <div class="outline-panel">
-            @foreach (var item in outlineItems)
+            @foreach (var heading in currentDocument.Headings)
             {
-                <div class="outline-item">@item</div>
+                <div class="outline-item">@heading</div>
             }
-            <div class="outline-item">
-                <input @bind="input" @onkeydown="AddOutlineItem" placeholder="Add Item"/>
-                </div>
         </div>
     </div> 
 
     <div class="editor-main">
         <div class="toolbar">
+            <!-- Toolbar buttons omitted for brevity -->
             <button class="tool-btn">B</button>
             <button class="tool-btn"><i>I</i></button>
-            <button class="tool-btn"><u>U</u></button>
-            <button class="tool-btn">A</button>
-            <button class="tool-btn">🔗</button>
-            <button class="tool-btn">≡</button>
-            <button class="tool-btn">S</button>
         </div>
 
         <div class="paper-container">
-            <textarea class="paper" placeholder="Start writing..."></textarea>
+            <input class="doc-title-input" @bind="currentDocument.Title" placeholder="Document Title" />
+            <textarea class="paper" @bind="currentPageBody" placeholder="Start writing..."></textarea>
         </div>
     </div>
 </div>
 
 @code {
+    [SupplyParameterFromQuery]
+    public long? Id { get; set; } 
+
     private bool isMenuOpen = false;
-    private string input = string.Empty;
-    private List<string> outlineItems = new List<string> {};
+    private bool isSaving = false;
+    private bool isLoading = true;
     
-    private void AddOutlineItem(KeyboardEventArgs e)
+    // Change to DocumentModel
+    private DocumentModel currentDocument = new();
+    private string currentPageBody = string.Empty;
+
+    protected override async Task OnInitializedAsync()
     {
-        if (e.Key == "Enter" && !string.IsNullOrWhiteSpace(input))
+        if (Id.HasValue)
         {
-            outlineItems.Add(input);
-            input = string.Empty;
+            await LoadDocument(Id.Value);
         }
     }
 
-    private void ToggleMenu()
+    private async Task LoadDocument(long id)
     {
-        isMenuOpen = !isMenuOpen;
+        var response = await Db.From<DocumentModel>() // Change here
+            .Where(d => d.Id == id)
+            .Single(); 
+
+        if (response != null)
+        {
+            currentDocument = response;
+            var firstPage = currentDocument.Pages.FirstOrDefault();
+            currentPageBody = firstPage?.Body ?? string.Empty;
+        }
     }
 
-    private void NewFile()
+    private void ToggleMenu() => isMenuOpen = !isMenuOpen;
+
+    private async Task SaveFile()
     {
-        isMenuOpen = false;
-        Console.WriteLine("New file created");
+        if (isSaving) return; 
+        isSaving = true;
+
+        try
+        {
+            // Update the Page data in the model
+            var pages = currentDocument.Pages;
+            if (pages.Any())
+            {
+                pages[0].Body = currentPageBody;
+            }
+            else
+            {
+                pages.Add(new Page(currentPageBody));
+            }
+            
+            // Trigger the JSON serialization
+            currentDocument.Pages = pages;
+
+            // Slide 51: Send an UPDATE request to Supabase
+        await Db.From<DocumentModel>()
+            .Where(d => d.Id == currentDocument.Id)
+            .Set(d => d.Title, currentDocument.Title)
+            .Set(d => d.ContentJson, currentDocument.ContentJson)
+            .Update();
+                
+            Console.WriteLine("File saved!");
+        }
+        finally
+        {
+            isSaving = false;
+            isMenuOpen = false;
+        }
     }
 
-    private void OpenFile()
+    private async Task SoftDeleteFile()
     {
-        isMenuOpen = false;
-    }
+        if (currentDocument.Id == 0) return;
 
-    private void SaveFile()
-    {
-        isMenuOpen = false;
-        Console.WriteLine("File saved");
+        // Slide 51: Soft delete is just an update
+        await Db.From<DocumentModel>()
+            .Where(d => d.Id == currentDocument.Id)
+            .Set(d => d.DeletedAt, DateTime.UtcNow)
+            .Update();
+
+        Navigation.NavigateTo("/dashboard");
     }
 }

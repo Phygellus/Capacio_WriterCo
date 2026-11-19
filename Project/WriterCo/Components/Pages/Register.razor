@@ -1,12 +1,22 @@
 @page "/register"
 @using WriterCo.Components.Layout
 @layout AuthLayout
-<div class="auth-form">
-    <input type="text" class="auth-input" placeholder="Enter Username" />
-    <input type="email" class="auth-input" placeholder="Enter Email" />
-    <input type="password" class="auth-input" placeholder="Enter Password" />
+@inject NavigationManager Navigation
+@inject Supabase.Client Db
 
-    <button class="auth-btn" @onclick="GoToDashboard">Sign Up</button>
+<div class="auth-form">
+    <input type="text" class="auth-input" placeholder="Enter Username" @bind="username" />
+    <input type="email" class="auth-input" placeholder="Enter Email" @bind="email" />
+    <input type="password" class="auth-input" placeholder="Enter Password" @bind="password" />
+
+    <button class="auth-btn" @onclick="SignUp" disabled="@isLoading">
+        @(isLoading ? "Signing up..." : "Sign Up")
+    </button>
+
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <p style="color: #ff4444; font-size: 14px; margin-top: 10px;">@errorMessage</p>
+    }
 
     <p class="auth-footer">
         Already have an account? <span @onclick="Login" class="nav-link">Log In</span>
@@ -14,15 +24,58 @@
 </div>
 
 @code {
-    [Inject]
-    private NavigationManager Navigation { get; set; } = default!;
+    private string username = "";
+    private string email = "";
+    private string password = "";
+    private bool isLoading = false;
+    private string errorMessage = "";
 
     private void Login()
     {
         Navigation.NavigateTo("/login");
     }
-    private void GoToDashboard()
+
+    private async Task SignUp()
     {
-        Navigation.NavigateTo("/dashboard");
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(username)) 
+        {
+            errorMessage = "Please fill in all fields.";
+            return;
+        }
+
+        isLoading = true;
+        errorMessage = "";
+
+        try
+        {
+            // 1. Create the user in Supabase Auth
+            var session = await Db.Auth.SignUp(email, password);
+
+            if (session?.User != null)
+            {
+                // 2. Insert the user details into your custom 'users' table
+                // Note: The 'Id' here comes from the Supabase Auth system
+                var newUser = new User
+                {
+                    Id = long.Parse(session.User.Id), // Supabase uses UUIDs, but we cast for your model
+                    Username = username,
+                    Email = email
+                };
+
+                await Db.From<User>().Insert(newUser);
+
+                // 3. Navigate to dashboard
+                Navigation.NavigateTo("/dashboard");
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Registration failed. The email might already be in use.";
+            Console.WriteLine(ex.Message);
+        }
+        finally
+        {
+            isLoading = false;
+        }
     }
 }
