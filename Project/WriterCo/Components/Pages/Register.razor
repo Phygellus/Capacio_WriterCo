@@ -57,10 +57,12 @@
                 // Note: The 'Id' here comes from the Supabase Auth system
                 var newUser = new User
                 {
-                    Id = long.Parse(session.User.Id), // Supabase uses UUIDs, but we cast for your model
                     Username = username,
-                    Email = email
+                    Email = email,
+                    AuthId = session.User.Id // Save the UUID string here instead
                 };
+
+                await Db.From<User>().Insert(newUser);
 
                 await Db.From<User>().Insert(newUser);
 
