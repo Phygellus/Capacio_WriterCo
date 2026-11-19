@@ -1,35 +1,72 @@
-public class Document
+using Supabase.Postgrest.Attributes;
+using Supabase.Postgrest.Models;
+using System.Text.Json;
+
+[Table("documents")]
+public class Document : BaseModel
 {
-    private String title;
-    private String[] headings;
-    private Page[] pages;
-    private bool isPublished;
+    [PrimaryKey("id", false)]
+    public long Id { get; set; }
 
-    public Document(string title)
+    [Column("title")]
+    public string Title { get; set; } = "Untitled";
+
+    [Column("owner_id")]
+    public long OwnerId { get; set; }
+
+    [Column("is_published")]
+    public bool IsPublished { get; set; } = false;
+
+    [Column("deleted_at")]
+    public DateTime? DeletedAt { get; set; }
+
+    [Column("created_at")]
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    // This IS a database column
+    [Column("content_json")]
+    public string ContentJson { get; set; } = "{\"pages\":[], \"headings\":[]}";
+
+    // NOT a database column (no [Column] attribute, no [Ignore] attribute)
+    public List<Page> Pages 
     {
-        this.title=title;
-        this.headings = [];
-        this.pages = [];
-        this.isPublished = false;
+        get 
+        {
+            var doc = JsonSerializer.Deserialize<DocumentContent>(ContentJson);
+            return doc?.Pages ?? new List<Page>();
+        }
+        set 
+        {
+            var doc = JsonSerializer.Deserialize<DocumentContent>(ContentJson) ?? new DocumentContent();
+            doc.Pages = value;
+            ContentJson = JsonSerializer.Serialize(doc);
+        }
     }
 
-    public void addPages(Page page)
+    // NOT a database column
+    public List<string> Headings
     {
-        pages.Append(page);
-    }
-
-    public void addHeading(String heading)
-    {
-        headings.Append(heading);
-    }
-
-    public bool getIsPublished()
-    {
-        return isPublished;
+        get 
+        {
+            var doc = JsonSerializer.Deserialize<DocumentContent>(ContentJson);
+            return doc?.Headings ?? new List<string>();
+        }
+        set 
+        {
+            var doc = JsonSerializer.Deserialize<DocumentContent>(ContentJson) ?? new DocumentContent();
+            doc.Headings = value;
+            ContentJson = JsonSerializer.Serialize(doc);
+        }
     }
 
     public void Published()
     {
-        this.isPublished = true;
+        IsPublished = true;
     }
+}
+
+public class DocumentContent
+{
+    public List<Page> Pages { get; set; } = new();
+    public List<string> Headings { get; set; } = new();
 }

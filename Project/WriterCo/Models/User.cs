@@ -1,38 +1,26 @@
-public class User
+using Supabase.Postgrest.Attributes;
+using Supabase.Postgrest.Models;
+
+[Table("users")]
+public class User : BaseModel
 {
-    private String username;
-    private String email;
-    private String password;
+    [PrimaryKey("id", false)]
+    public long Id { get; set; }
 
-    public User(String username, String email, String password)
-    {
-        this.username=username;
-        this.email=email;
-        this.password=password;
-    }
+    [Column("username")]
+    public string Username { get; set; } = string.Empty;
 
-    public String getUsername()
-    {
-        return username;
-    }
-    public String getEmail()
-    {
-        return email;
-    }
-    public String getPassword()
-    {
-        return password;
-    }
-    protected void setUsername(String username)
-    {
-        this.username=username;
-    }
-    protected void setPassword(String password)
-    {
-        this.password=password;
-    }
-    protected void setEmail(String email)
-    {
-        this.email=email;
-    }
+    [Column("email")]
+    public string Email { get; set; } = string.Empty;
+
+    // Note: Never store plain text passwords. Supabase Auth handles this securely in the background.
+    // We keep this property here just so the model matches your original design.
+    [Column("password_hash")] 
+    public string PasswordHash { get; set; } = string.Empty;
+
+    [Column("deleted_at")] 
+    public DateTime? DeletedAt { get; set; }
+
+    [Column("created_at")]
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

@@ -1,32 +1,19 @@
 public class Page
 {
-    private String body;
-    private String heading;
+    public string Body { get; set; } = string.Empty;
+    public string Heading { get; set; } = string.Empty;
 
-    public Page(String body, String heading)
+    public Page() { } // Required for JSON deserialization
+
+    public Page(string body, string heading)
     {
-        this.body=body;
-        this.heading=heading;
+        Body = body;
+        Heading = heading;
     }
-    public Page(String body)
+    
+    public Page(string body)
     {
-        this.body=body;
-        this.heading="";
-    }
-    public String getBody()
-    {
-        return body;
-    }
-    public String getHeading()
-    {
-        return heading;
-    }
-    public void setBody(String body)
-    {
-        this.body=body;
-    }
-    public void setHeading(String heading)
-    {
-        this.heading=heading;
+        Body = body;
+        Heading = "";
     }
 }

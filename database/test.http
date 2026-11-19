@@ -1,0 +1,7 @@
+@url = https://ywbnesdqqivicvjescgi.supabase.co
+
+@key = sb_publishable_ZsIXX06t1nJe7qKmpIQ-Ug_UTFX0bDS
+
+GET {{url}}/rest/v1/products?select=*​
+
+apikey: {{key}}​
