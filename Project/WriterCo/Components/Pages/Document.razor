@@ -22,22 +22,33 @@
         </div>
 
         <div class="outline-panel">
-            @foreach (var heading in currentDocument.Headings)
+            @foreach (var heading in currentHeadings)
             {
                 <div class="outline-item">@heading</div>
             }
+            
+            <!-- Input to add new headings -->
+            <div class="outline-item" style="margin-top: 10px;">
+                <input @bind="newHeadingInput" @onkeydown="AddHeading" placeholder="+ Add Heading" class="heading-input" />
+            </div>
         </div>
     </div> 
 
     <div class="editor-main">
+        <!-- Google Docs Style Toolbar -->
         <div class="toolbar">
-            <!-- Toolbar buttons omitted for brevity -->
-            <button class="tool-btn">B</button>
-            <button class="tool-btn"><i>I</i></button>
+            <!-- Title Input on the left -->
+            <input class="doc-title-input" @bind="currentDocument.Title" placeholder="Untitled Document" />
+            
+            <!-- Formatting Buttons on the right -->
+            <div class="format-buttons">
+                <button class="tool-btn">B</button>
+                <button class="tool-btn"><i>I</i></button>
+                <button class="tool-btn"><u>U</u></button>
+            </div>
         </div>
 
         <div class="paper-container">
-            <input class="doc-title-input" @bind="currentDocument.Title" placeholder="Document Title" />
             <textarea class="paper" @bind="currentPageBody" placeholder="Start writing..."></textarea>
         </div>
     </div>
@@ -49,11 +60,13 @@
 
     private bool isMenuOpen = false;
     private bool isSaving = false;
-    private bool isLoading = true;
     
-    // Change to DocumentModel
     private DocumentModel currentDocument = new();
     private string currentPageBody = string.Empty;
+    
+    // Lists for the outline panel
+    private List<string> currentHeadings = new();
+    private string newHeadingInput = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -65,19 +78,34 @@
 
     private async Task LoadDocument(long id)
     {
-        var response = await Db.From<DocumentModel>() // Change here
+        var response = await Db.From<DocumentModel>()
             .Where(d => d.Id == id)
             .Single(); 
 
         if (response != null)
         {
             currentDocument = response;
-            var firstPage = currentDocument.Pages.FirstOrDefault();
+            
+            // Load the text body
+            var firstPage = currentDocument.GetPages().FirstOrDefault();
             currentPageBody = firstPage?.Body ?? string.Empty;
+            
+            // Load the headings
+            currentHeadings = currentDocument.GetHeadings();
         }
     }
 
     private void ToggleMenu() => isMenuOpen = !isMenuOpen;
+
+    // Adds a heading to the list when the user presses Enter
+    private void AddHeading(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !string.IsNullOrWhiteSpace(newHeadingInput))
+        {
+            currentHeadings.Add(newHeadingInput);
+            newHeadingInput = ""; // Clear input
+        }
+    }
 
     private async Task SaveFile()
     {
@@ -86,8 +114,8 @@
 
         try
         {
-            // Update the Page data in the model
-            var pages = currentDocument.Pages;
+            // 1. Save the Page Body
+            var pages = currentDocument.GetPages();
             if (pages.Any())
             {
                 pages[0].Body = currentPageBody;
@@ -96,18 +124,23 @@
             {
                 pages.Add(new Page(currentPageBody));
             }
-            
-            // Trigger the JSON serialization
-            currentDocument.Pages = pages;
+            currentDocument.SetPages(pages);
 
-            // Slide 51: Send an UPDATE request to Supabase
-        await Db.From<DocumentModel>()
-            .Where(d => d.Id == currentDocument.Id)
-            .Set(d => d.Title, currentDocument.Title)
-            .Set(d => d.ContentJson, currentDocument.ContentJson)
-            .Update();
+            // 2. Save the Headings
+            currentDocument.SetHeadings(currentHeadings);
+
+            // 3. Update Supabase
+            await Db.From<DocumentModel>()
+                .Where(d => d.Id == currentDocument.Id)
+                .Set(d => d.Title, currentDocument.Title)
+                .Set(d => d.ContentJson, currentDocument.ContentJson)
+                .Update();
                 
-            Console.WriteLine("File saved!");
+            Console.WriteLine("Saved successfully!");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving: {ex.Message}");
         }
         finally
         {
@@ -120,7 +153,6 @@
     {
         if (currentDocument.Id == 0) return;
 
-        // Slide 51: Soft delete is just an update
         await Db.From<DocumentModel>()
             .Where(d => d.Id == currentDocument.Id)
             .Set(d => d.DeletedAt, DateTime.UtcNow)

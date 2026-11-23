@@ -3,7 +3,7 @@ using Supabase.Postgrest.Models;
 using System.Text.Json;
 
 [Table("documents")]
-public class DocumentModel : BaseModel // Changed name here
+public class DocumentModel : BaseModel
 {
     [PrimaryKey("id", false)]
     public long Id { get; set; }
@@ -25,43 +25,37 @@ public class DocumentModel : BaseModel // Changed name here
 
     [Column("content_json")]
     public string ContentJson { get; set; } = "{\"pages\":[], \"headings\":[]}";
-    public List<Page> Pages 
+
+    // --- These are now methods, so Supabase completely ignores them ---
+
+    public List<string> GetHeadings()
     {
-        get 
-        {
-            var doc = JsonSerializer.Deserialize<DocumentContent>(ContentJson);
-            return doc?.Pages ?? new List<Page>();
-        }
-        set 
-        {
-            var doc = JsonSerializer.Deserialize<DocumentContent>(ContentJson) ?? new DocumentContent();
-            doc.Pages = value;
-            ContentJson = JsonSerializer.Serialize(doc);
-        }
+        var doc = JsonSerializer.Deserialize<DocumentContent>(ContentJson);
+        return doc?.Headings ?? new List<string>();
     }
 
-    // NOT a database column
-    public List<string> Headings
+    public List<Page> GetPages()
     {
-        get 
-        {
-            var doc = JsonSerializer.Deserialize<DocumentContent>(ContentJson);
-            return doc?.Headings ?? new List<string>();
-        }
-        set 
-        {
-            var doc = JsonSerializer.Deserialize<DocumentContent>(ContentJson) ?? new DocumentContent();
-            doc.Headings = value;
-            ContentJson = JsonSerializer.Serialize(doc);
-        }
+        var doc = JsonSerializer.Deserialize<DocumentContent>(ContentJson);
+        return doc?.Pages ?? new List<Page>();
+    }
+    
+    public void SetPages(List<Page> pages)
+    {
+        var doc = JsonSerializer.Deserialize<DocumentContent>(ContentJson) ?? new DocumentContent();
+        doc.Pages = pages;
+        ContentJson = JsonSerializer.Serialize(doc);
     }
 
-    public void Published()
+    public void SetHeadings(List<string> headings)
     {
-        IsPublished = true;
+        var doc = JsonSerializer.Deserialize<DocumentContent>(ContentJson) ?? new DocumentContent();
+        doc.Headings = headings;
+        ContentJson = JsonSerializer.Serialize(doc);
     }
 }
 
+// Helper class for JSON
 public class DocumentContent
 {
     public List<Page> Pages { get; set; } = new();
