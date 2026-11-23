@@ -1,16 +1,24 @@
 @inherits LayoutComponentBase
 @inject NavigationManager Navigation
-
+@inject UserSession Session
+<!-- SigneedLayout.razor-->
 <div class="main-layout">
     <header class="navbar">
         <a @onclick="GoToHome" class="logo">Writer Co.</a>
         <nav>
-            <span @onclick="GoToRating" class="nav-link">
-                Rate Us
-            </span>
+            <span @onclick="GoToRating" class="nav-link">Rate Us</span>
+            
+            <!-- Show the Username -->
+            <span class="nav-link" style="color: #888;">@Session.CurrentUser?.Username</span>
+
             <div class="profile-container">
                 <img src="/images/user-icon.jpg" alt="User" class="user-icon" />
             </div>
+            
+            <!-- Logout Button -->
+            <button @onclick="LogOut" class="nav-btn" style="background-color: transparent; color: white; border: 1px solid #555;">
+                Log Out
+            </button>
         </nav>
     </header>
     
@@ -20,12 +28,12 @@
 </div>
 
 @code {
-    private void GoToHome()
+    private void GoToHome() => Navigation.NavigateTo("/dashboard");
+    private void GoToRating() => Navigation.NavigateTo("/rate");
+    
+    private void LogOut()
     {
-        Navigation.NavigateTo("/dashboard");
-    }
-    private void GoToRating()
-    {
-        Navigation.NavigateTo("/rate");
+        Session.LogOut(); // Clear the memory
+        Navigation.NavigateTo("/login");
     }
 }

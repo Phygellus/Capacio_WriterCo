@@ -3,6 +3,7 @@
 @layout AuthLayout
 @inject NavigationManager Navigation
 @inject Supabase.Client Db
+@inject UserSession Session
 
 <div class="auth-form">
     <input type="text" class="auth-input" placeholder="Enter Username" @bind="username" />
@@ -15,11 +16,11 @@
 
     @if (!string.IsNullOrEmpty(errorMessage))
     {
-        <p style="color: #ff4444; font-size: 14px; margin-top: 10px;">@errorMessage</p>
+        <p style="color: #ff4444; font-size: 14px; margin-top: 10px; text-align: center;">@errorMessage</p>
     }
 
     <p class="auth-footer">
-        Already have an account? <span @onclick="Login" class="nav-link">Log In</span>
+        Already have an account? <span @onclick="GoToLogin" class="nav-link">Log In</span>
     </p>
 </div>
 
@@ -30,14 +31,11 @@
     private bool isLoading = false;
     private string errorMessage = "";
 
-    private void Login()
-    {
-        Navigation.NavigateTo("/login");
-    }
+    private void GoToLogin() => Navigation.NavigateTo("/login");
 
     private async Task SignUp()
     {
-        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(username)) 
+        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
         {
             errorMessage = "Please fill in all fields.";
             return;
@@ -48,31 +46,33 @@
 
         try
         {
-            // 1. Create the user in Supabase Auth
-            var session = await Db.Auth.SignUp(email, password);
-
-            if (session?.User != null)
+            var existingUsers = await Db.From<User>().Where(u => u.Email == email).Get();
+            if (existingUsers.Models.Count > 0)
             {
-                // 2. Insert the user details into your custom 'users' table
-                // Note: The 'Id' here comes from the Supabase Auth system
-                var newUser = new User
-                {
-                    Username = username,
-                    Email = email,
-                    AuthId = session.User.Id // Save the UUID string here instead
-                };
+                errorMessage = "Email is already registered. Try logging in.";
+                return;
+            }
 
-                await Db.From<User>().Insert(newUser);
+            var newUser = new User
+            {
+                Username = username,
+                Email = email,
+                Password = password
+            };
 
-                await Db.From<User>().Insert(newUser);
+            // Insert returns the newly created model (including the auto-generated ID!)
+            var response = await Db.From<User>().Insert(newUser);
+            var createdUser = response.Models.FirstOrDefault();
 
-                // 3. Navigate to dashboard
+            if (createdUser != null)
+            {
+                Session.LogIn(createdUser); // Save to Session
                 Navigation.NavigateTo("/dashboard");
             }
         }
         catch (Exception ex)
         {
-            errorMessage = "Registration failed. The email might already be in use.";
+            errorMessage = "Registration failed.";
             Console.WriteLine(ex.Message);
         }
         finally

@@ -16,7 +16,8 @@ builder.Services.AddSingleton<Supabase.Client>(sp =>
         AutoConnectRealtime = false 
     });
 });
-
+// Add this line before builder.Build()
+builder.Services.AddSingleton<UserSession>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

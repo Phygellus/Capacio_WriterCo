@@ -3,7 +3,7 @@
 @layout AuthLayout
 @inject NavigationManager Navigation
 @inject Supabase.Client Db
-
+@inject UserSession Session
 <div class="auth-form">
     <input type="email" class="auth-input" placeholder="Enter Email" @bind="email" />
     <input type="password" class="auth-input" placeholder="Enter Password" @bind="password" />
@@ -28,10 +28,7 @@
     private bool isLoading = false;
     private string errorMessage = "";
 
-    private void GoToRegister()
-    {
-        Navigation.NavigateTo("/register");
-    }
+    private void GoToRegister() => Navigation.NavigateTo("/register");
 
     private async Task LogIn()
     {
@@ -42,18 +39,25 @@
 
         try
         {
-            // Slide 50: Protect against double clicks / network errors
-            var session = await Db.Auth.SignIn(email, password);
+            var response = await Db.From<User>()
+                .Where(u => u.Email == email && u.Password == password)
+                .Get();
 
-            if (session != null)
+            var user = response.Models.FirstOrDefault();
+
+            if (user != null)
             {
+                Session.LogIn(user); // Save to Session
                 Navigation.NavigateTo("/dashboard");
+            }
+            else
+            {
+                errorMessage = "Invalid email or password.";
             }
         }
         catch (Exception ex)
         {
-            // Supabase throws an exception if login fails (e.g., wrong password)
-            errorMessage = "Invalid email or password. Please try again.";
+            errorMessage = "An error occurred during login.";
             Console.WriteLine(ex.Message);
         }
         finally

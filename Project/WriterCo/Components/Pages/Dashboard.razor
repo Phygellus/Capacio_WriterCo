@@ -3,6 +3,7 @@
 @layout SignedLayout
 @inject NavigationManager Navigation
 @inject Supabase.Client Db
+@inject UserSession Session
 
 <div class="dashboard-container">
     <div class="document-grid">
@@ -41,31 +42,63 @@
         await LoadDocuments();
     }
 
-    private async Task LoadDocuments()
+private async Task LoadDocuments()
+{
+    isLoading = true;
+    try
     {
-        // Change to DocumentModel
+        var currentUserId = Session.CurrentUser?.Id ?? 0;
+        
         var response = await Db.From<DocumentModel>()
             .Where(d => d.DeletedAt == null)
+            .Where(d => d.OwnerId == currentUserId)
             .Order(d => d.Id, Supabase.Postgrest.Constants.Ordering.Descending)
             .Get();
             
         userDocuments = response.Models;
     }
-
+    catch (Exception ex)
+    {
+        // This will print the exact Postgres error to your terminal
+        Console.WriteLine("=== ERROR LOADING DOCUMENTS ===");
+        Console.WriteLine(ex.Message);
+        Console.WriteLine("===============================");
+    }
+    finally
+    {
+        isLoading = false;
+    }
+}
     private async Task CreateNewDocument()
     {
-        var newDoc = new DocumentModel // Change here
-        {
-            Title = "Untitled",
-            OwnerId = 1 
-        };
+        if (isCreating) return; 
+        isCreating = true;
 
-        var response = await Db.From<DocumentModel>().Insert(newDoc); // Change here
-        var createdDoc = response.Models.FirstOrDefault();
-        
-        if (createdDoc != null)
+        try
         {
-            Navigation.NavigateTo($"/document?id={createdDoc.Id}");
+            if (Session.CurrentUser == null)
+            {
+                Navigation.NavigateTo("/login");
+                return;
+            }
+
+            var newDoc = new DocumentModel
+            {
+                Title = "Untitled",
+                OwnerId = Session.CurrentUser.Id // <--- Use the Session ID
+            };
+
+            var response = await Db.From<DocumentModel>().Insert(newDoc);
+            var createdDoc = response.Models.FirstOrDefault();
+            
+            if (createdDoc != null)
+            {
+                Navigation.NavigateTo($"/document?id={createdDoc.Id}");
+            }
+        }
+        finally
+        {
+            isCreating = false;
         }
     }
 
